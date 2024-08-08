@@ -28,6 +28,8 @@ public class ShooterBehavior : MonoBehaviour {
     #endregion
     
     private Vector3 _targetPos;
+    private Vector3 SelfPos => transform.position;
+    private Vector3 PlayerPos => _player.transform.position;
 
     [Tooltip("Delay between shots from enemy in seconds.")] [SerializeField]
     private float shotDelay = 2f;
@@ -48,13 +50,15 @@ public class ShooterBehavior : MonoBehaviour {
 
     private Timer _shotClock;
     private bool _shotFlag;
-    //private bool;
     
     #region Debug Status Variables
     
     public bool shotAvailable;
     public float timeLeftOnShotClock;
     public bool isShotClockPaused;
+    public bool playerInRange;
+    public bool hasLOSofPlayer;
+    public string currentAction;
     
     #endregion
     
@@ -73,31 +77,31 @@ public class ShooterBehavior : MonoBehaviour {
     }
 
     void Update() {
-        Vector3 playerPos = _player.transform.position;
-        Vector3 selfPos = transform.position;
-        
-        float playerDistance = Vector2.Distance(playerPos, selfPos);
+        float playerDistance = Vector2.Distance(PlayerPos, SelfPos);
         bool tooClose = playerDistance < lowerMoveDistance;
         bool tooFar = playerDistance > upperMoveDistance;
         bool inRange = !tooFar && !tooClose;
+        playerInRange = inRange;
         
-        Vector2 dirToPlayer = playerPos - selfPos;
+        Vector2 dirToPlayer = PlayerPos - SelfPos;
         dirToPlayer = dirToPlayer.normalized;
-        LayerMask mask = LayerMask.GetMask("Entity", "Wall");
-        RaycastHit2D hit = Physics2D.Raycast(selfPos, dirToPlayer, maxCastRange, mask);
-        bool hasLineOfSight = hit && hit.collider.gameObject.CompareTag("Player");
+        LayerMask mask = LayerMask.GetMask("Wall");
+        RaycastHit2D hit = Physics2D.Raycast(SelfPos, dirToPlayer, playerDistance, mask);
+        
+        //bool hasLineOfSight = hit && hit.collider.gameObject.CompareTag("Player");
+        bool hasLineOfSight = !hit.collider;
+        hasLOSofPlayer = hasLineOfSight;
         
         #region Line Of Sight Debug Code
-        Vector3 newSelfPos = selfPos;
+        Vector3 newSelfPos = SelfPos;
         newSelfPos.z = -1f;
-        Vector3 endPoint = hit.collider ? hit.point : (Vector2)selfPos + dirToPlayer * maxCastRange;
-        endPoint.z = -1f;
+        Vector3 endPoint = hit.collider ? hit.point : (Vector2)newSelfPos + dirToPlayer * playerDistance;
         Debug.DrawLine(newSelfPos, endPoint, Color.magenta);
         #endregion
         
         shotAvailable = hasLineOfSight && inRange; // status variable
 
-        PointSpriteGroup(inRange, hasLineOfSight, dirToPlayer);
+        PointSpriteGroup(tooFar, hasLineOfSight, dirToPlayer);
         
         if (!hasLineOfSight || !inRange) {
             StopShotClock();
@@ -121,20 +125,21 @@ public class ShooterBehavior : MonoBehaviour {
         }
 
         timeLeftOnShotClock = _shotClock.GetTimeRemaining();
-        isShotClockPaused = _shotClock.isPaused;
+        isShotClockPaused = _shotClock.isCancelled;
         
         if (_shotFlag) {
-            Vector2 dirToMuzzle = MuzzlePoint - selfPos;
+            Vector2 dirToMuzzle = MuzzlePoint - SelfPos;
             Shoot(dirToMuzzle);
         }
     }
 
-    void PointSpriteGroup(bool inRange, bool hasLineOfSight, Vector2 directionTowardsPlayer) {
-        if (inRange && hasLineOfSight) {
+    void PointSpriteGroup(bool tooFar, bool hasLineOfSight, Vector2 directionTowardsPlayer) {
+        if (!tooFar && hasLineOfSight) {
             PointSprites(directionTowardsPlayer);
         }
         else {
             Vector2 velocityDir = _agent.velocity;
+            if (velocityDir == Vector2.zero) return;
             PointSprites(velocityDir);
         }
     }
@@ -142,12 +147,16 @@ public class ShooterBehavior : MonoBehaviour {
     void MoveTowardsPlayer() {
         _targetPos = _player.transform.position;
         MoveTowards(_targetPos);
+        
+        currentAction = "Moving to player";
     }
     
     void MoveAwayFromPlayer(Vector2 dirToPlayer) {
         Vector2 awayDir = dirToPlayer * -1;
-        _targetPos = _player.transform.position + (Vector3)awayDir * lowerMoveDistance;
+        _targetPos = SelfPos + (Vector3)awayDir * (lowerMoveDistance);
         MoveTowards(_targetPos);
+
+        currentAction = "Moving from player";
     }
 
     void StopMoving() {
@@ -161,7 +170,7 @@ public class ShooterBehavior : MonoBehaviour {
 
     void Shoot(Vector2 shotDirection) {
         //if (_rb.velocity.magnitude > 0f) return;
-        Debug.Log("Shooter shot!");
+        currentAction = "Shooting!";
 
         _fm.FireProjectile(bullet, entityType.enemy, muzzleObj.transform.position, shotDirection);
         
@@ -170,6 +179,8 @@ public class ShooterBehavior : MonoBehaviour {
     }
 
     Timer StartShotClock() {
+        currentAction = "Aiming at player";
+        
         _shotClock = this.AttachTimer(shotDelay, () => {
             _shotFlag = true;
         });

@@ -561,12 +561,16 @@ MonoBehaviour:
   spriteGroup: {fileID: 6394793033727183736}
   shotDelay: 1.2
   shootDistance: 7
-  upperMoveDistance: 12
-  lowerMoveDistance: 3
+  upperMoveDistance: 15
+  lowerMoveDistance: 5
   maxTurnSpeed: 0.5
+  maxCastRange: 100
   shotAvailable: 0
   timeLeftOnShotClock: 0
-  isShotClockCancelled: 0
+  isShotClockPaused: 0
+  playerInRange: 0
+  hasLOSofPlayer: 0
+  currentAction: 
 --- !u!1 &6394793033727183736
 GameObject:
   m_ObjectHideFlags: 0

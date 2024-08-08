@@ -53,7 +53,10 @@ public class debugUI : MonoBehaviour {
             debugStrings.Add($"ShotAvailable: {_sb.shotAvailable}");
             debugStrings.Add($"Distance from shooter: {Vector2.Distance(shooterPos, _player.transform.position)}");
             debugStrings.Add($"Time left on shot clock: {_sb.timeLeftOnShotClock}");
-            debugStrings.Add($"ShotClockPaused?: {_sb.isShotClockPaused}");
+            debugStrings.Add($"Shot clock cancelled?: {_sb.isShotClockPaused}");
+            debugStrings.Add($"Has line of sight?: {_sb.hasLOSofPlayer}");
+            debugStrings.Add($"In range of player?: {_sb.playerInRange}");
+            debugStrings.Add($"Current action: {_sb.currentAction}");
         }
         else {
             _shooter = FindEnemy("Shooter");
