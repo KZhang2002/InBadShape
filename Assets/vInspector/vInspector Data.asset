@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7915df4cd4da490ab52fc8fa9ee9127, type: 3}
+  m_Name: vInspector Data
+  m_EditorClassIdentifier: 
+  items:
+  - globalId:
+      globalObjectIdString: GlobalObjectId_V1-1-8de353a784b328541a343085edb014f8-5314158963423462230-0
+    _typeString: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    _obj: {fileID: 5314158963423462230, guid: 8de353a784b328541a343085edb014f8, type: 3}
+    isSceneGameObject: 0
+    isAsset: 1
+    id: 1057680721
+  - globalId:
+      globalObjectIdString: GlobalObjectId_V1-1-77c384c7ebde6d445bcd661065caa004-1360930260255989933-0
+    _typeString: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    _obj: {fileID: 1360930260255989933, guid: 77c384c7ebde6d445bcd661065caa004, type: 3}
+    isSceneGameObject: 0
+    isAsset: 1
+    id: 1033019505
