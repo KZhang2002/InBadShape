@@ -36,9 +36,9 @@ public class Bullet : MonoBehaviour {
         this.lifeTime = lifeTime;
     }
 
-    private void OnCollisionEnter2D(Collision2D other) {
-        HitHelper.DoHit(other.gameObject, damage, owner);
-        if (!canPen) Destroy(gameObject);
+    void OnTriggerEnter2D(Collider2D other) {
+        bool isValid = HitHelper.DoHit(other.gameObject, damage, owner);
+        if (!canPen && isValid) Destroy(gameObject);
     }
     
     private void Update() {

@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5794739729827338039, guid: bf302cdb96865214e840190d7481d3f6, type: 3}
       propertyPath: m_Name
-      value: FallbackProjectile
+      value: PlayerProjectile
+      objectReference: {fileID: 0}
+    - target: {fileID: 8192345578364568628, guid: bf302cdb96865214e840190d7481d3f6, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

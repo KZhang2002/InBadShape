@@ -30,8 +30,8 @@ public class debugUI : MonoBehaviour {
         
     }
 
-    private GameObject FindEnemy(string tag) {
-        return GameObject.FindGameObjectWithTag(tag);
+    private GameObject FindEnemy(string entityTypeTag) {
+        return GameObject.FindGameObjectWithTag(entityTypeTag);
     }
 
     private void OnGUI() {
@@ -54,7 +54,7 @@ public class debugUI : MonoBehaviour {
             debugStrings.Add($"Distance from shooter: {Vector2.Distance(shooterPos, _player.transform.position)}");
             debugStrings.Add($"Time left on shot clock: {_sb.timeLeftOnShotClock}");
             debugStrings.Add($"Shot clock cancelled?: {_sb.isShotClockPaused}");
-            debugStrings.Add($"Has line of sight?: {_sb.hasLOSofPlayer}");
+            debugStrings.Add($"Has line of sight?: {_sb.hasLoSofPlayer}");
             debugStrings.Add($"In range of player?: {_sb.playerInRange}");
             debugStrings.Add($"Current action: {_sb.currentAction}");
         }

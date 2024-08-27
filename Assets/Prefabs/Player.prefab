@@ -242,7 +242,7 @@ MonoBehaviour:
   roundsPerMinute: 0
   fire2Dmg: 5
   fire2Range: 100
-  fire2MaxPenTargets: 1
+  fire2MaxPenTargets: 3
   fire2HitList: 01000000
 --- !u!114 &8874914565674514618
 MonoBehaviour:

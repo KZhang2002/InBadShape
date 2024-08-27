@@ -79,29 +79,4 @@ public class FiringController : MonoBehaviour {
             _tm.Trace(tracerPrefab, _muzzlePoint, dir, 100);
         }
     }
-
-    // todo deprecated, delete
-    // void FireProjectile(Vector2 dir, float dmg, float speed, float lifetime) {
-    //     Bullet projectile = Instantiate(bulletPrefab, _muzzlePoint, transform.rotation);
-    //     projectile.Init(entityType.player, dmg, speed, lifetime);
-    //     Rigidbody2D projRb = projectile.GetComponent<Rigidbody2D>();
-    //     projRb.velocity = dir * speed;
-    // }
-    
-    // RaycastHit2D FireHitscan(Vector2 dir, float dmg) {
-    //     RaycastHit2D[] hits = Physics2D.RaycastAll(_muzzlePoint, dir);
-    //     Debug.DrawRay(_muzzlePoint, dir * fire2Range, Color.red, 0.1f);
-    //     float numTargets = fire2MaxPenTargets;
-    //     foreach (RaycastHit2D hit in hits) {
-    //         bool hitIsValid = HitHelper.DoHit(hit.collider.gameObject, dmg, fire2HitList, entityType.player);
-    //         Debug.DrawRay(hit.point + Vector2.left * 0.5f, Vector2.right, Color.cyan, 0.5f);
-    //         Debug.DrawRay(hit.point + Vector2.down * 0.5f, Vector2.up, Color.cyan, 0.5f);
-    //         numTargets--;
-    //         if (numTargets <= 0 || !hitIsValid) {
-    //             return hit;
-    //         }
-    //     }
-    //
-    //     return new RaycastHit2D();
-    // }
 }

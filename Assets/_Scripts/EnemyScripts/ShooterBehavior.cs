@@ -45,6 +45,10 @@ public class ShooterBehavior : MonoBehaviour {
 
     [Tooltip("Max speed in degrees that sprite can turn.")] [SerializeField]
     private float maxTurnSpeed = 20f;
+    
+    [Tooltip("The extra distance to consider when checking line of sight. " +
+             "Input half of the projectile this enemy shoots.")] [SerializeField]
+    private float LOSWidth = 0.1f;
 
     [SerializeField] private float maxCastRange = 100f;
 
@@ -57,7 +61,7 @@ public class ShooterBehavior : MonoBehaviour {
     public float timeLeftOnShotClock;
     public bool isShotClockPaused;
     public bool playerInRange;
-    public bool hasLOSofPlayer;
+    public bool hasLoSofPlayer;
     public string currentAction;
     
     #endregion
@@ -76,6 +80,33 @@ public class ShooterBehavior : MonoBehaviour {
         StartShotClock();
     }
 
+    bool hasLOS(Vector2 dirToPlayer, float playerDistance, LayerMask mask) {
+        RaycastHit2D hit = Physics2D.Raycast(SelfPos, dirToPlayer, playerDistance, mask);
+        bool hasCenterLOS = !hit.collider;
+        if (!hasCenterLOS) return false;
+        
+        #region Line Of Sight Debug Code
+        Vector3 newSelfPos = SelfPos;
+        newSelfPos.z = -1f;
+        Vector3 endPoint = hit.collider ? hit.point : (Vector2)newSelfPos + dirToPlayer * playerDistance;
+        Debug.DrawLine(newSelfPos, endPoint, Color.magenta);
+        #endregion
+        
+        Vector2 perpDir = Vector2.Perpendicular(dirToPlayer) * LOSWidth;
+        RaycastHit2D leftHit = Physics2D.Raycast((Vector2)SelfPos + perpDir, dirToPlayer, playerDistance, mask);
+        bool leftLOS = !leftHit.collider;
+        RaycastHit2D rightHit = Physics2D.Raycast((Vector2)SelfPos - perpDir, dirToPlayer, playerDistance, mask);
+        bool rightLOS = !rightHit.collider;
+        
+        #region Line Of Sight Debug Code
+        Vector2 perpDirDebug = Vector2.Perpendicular(dirToPlayer) * LOSWidth;
+        Debug.DrawLine((Vector2)newSelfPos + perpDirDebug, (Vector2)endPoint + perpDirDebug, Color.magenta);
+        Debug.DrawLine((Vector2)newSelfPos - perpDirDebug, (Vector2)endPoint - perpDirDebug, Color.magenta);
+        #endregion
+
+        return leftLOS && rightLOS;
+    }
+
     void Update() {
         float playerDistance = Vector2.Distance(PlayerPos, SelfPos);
         bool tooClose = playerDistance < lowerMoveDistance;
@@ -86,36 +117,25 @@ public class ShooterBehavior : MonoBehaviour {
         Vector2 dirToPlayer = PlayerPos - SelfPos;
         dirToPlayer = dirToPlayer.normalized;
         LayerMask mask = LayerMask.GetMask("Wall");
-        RaycastHit2D hit = Physics2D.Raycast(SelfPos, dirToPlayer, playerDistance, mask);
-        
-        //bool hasLineOfSight = hit && hit.collider.gameObject.CompareTag("Player");
-        bool hasLineOfSight = !hit.collider;
-        hasLOSofPlayer = hasLineOfSight;
+        bool hasLineOfSight = hasLOS(dirToPlayer, playerDistance, mask);
         
         #region Line Of Sight Debug Code
-        Vector3 newSelfPos = SelfPos;
-        newSelfPos.z = -1f;
-        Vector3 endPoint = hit.collider ? hit.point : (Vector2)newSelfPos + dirToPlayer * playerDistance;
-        Debug.DrawLine(newSelfPos, endPoint, Color.magenta);
-        #endregion
-        
+        hasLoSofPlayer = hasLineOfSight;
         shotAvailable = hasLineOfSight && inRange; // status variable
+        #endregion
 
         PointSpriteGroup(tooFar, hasLineOfSight, dirToPlayer);
         
         if (!hasLineOfSight || !inRange) {
             StopShotClock();
-            //todo add conditional for tooclose
-            if (tooClose) {
+            
+            if (tooClose)
                 MoveAwayFromPlayer(dirToPlayer);
-            }
-            else {
+            else
                 MoveTowardsPlayer();
-            }
             
             Debug.DrawRay(_targetPos + Vector3.left, Vector3.right * 2, Color.red);
             Debug.DrawRay(_targetPos + Vector3.down, Vector3.up * 2, Color.red);
-            
             return;
         }
         
@@ -124,8 +144,10 @@ public class ShooterBehavior : MonoBehaviour {
             StartShotClock();
         }
 
+        #region Debug vars
         timeLeftOnShotClock = _shotClock.GetTimeRemaining();
         isShotClockPaused = _shotClock.isCancelled;
+        #endregion
         
         if (_shotFlag) {
             Vector2 dirToMuzzle = MuzzlePoint - SelfPos;
@@ -143,6 +165,18 @@ public class ShooterBehavior : MonoBehaviour {
             PointSprites(velocityDir);
         }
     }
+
+    // void Move(bool tooClose, Vector2 dirToPlayer) {
+    //     StopShotClock();
+    //         
+    //     if (tooClose)
+    //         MoveAwayFromPlayer(dirToPlayer);
+    //     else
+    //         MoveTowardsPlayer();
+    //         
+    //     Debug.DrawRay(_targetPos + Vector3.left, Vector3.right * 2, Color.red);
+    //     Debug.DrawRay(_targetPos + Vector3.down, Vector3.up * 2, Color.red);
+    // }
 
     void MoveTowardsPlayer() {
         _targetPos = _player.transform.position;
@@ -169,9 +203,6 @@ public class ShooterBehavior : MonoBehaviour {
     }
 
     void Shoot(Vector2 shotDirection) {
-        //if (_rb.velocity.magnitude > 0f) return;
-        currentAction = "Shooting!";
-
         _fm.FireProjectile(bullet, entityType.enemy, muzzleObj.transform.position, shotDirection);
         
         _shotFlag = false;
@@ -179,8 +210,6 @@ public class ShooterBehavior : MonoBehaviour {
     }
 
     Timer StartShotClock() {
-        currentAction = "Aiming at player";
-        
         _shotClock = this.AttachTimer(shotDelay, () => {
             _shotFlag = true;
         });
